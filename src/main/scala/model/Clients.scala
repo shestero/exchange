@@ -2,10 +2,12 @@ package model
 
 object Clients extends io.TsvReader("clients.txt") {
 
+  val clients: Seq[(String, Client)] = read(Client.fromArray).toSeq
+
   // ids = ordered client id's (to preserve client's order for output)
-  val (ids: Seq[String], repo0) = read(Client.fromArray).map{ case p @ (id, _) => id -> p }.toSeq.unzip
+  val ids: Seq[String] = clients.map(_._1)
 
   // start = initial state
-  val start = State(repo0.toMap, List.empty)
+  val start = State(clients.toMap, List.empty)
 
 }
