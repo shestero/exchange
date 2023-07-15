@@ -5,8 +5,8 @@ import org.scalatest.funsuite.AnyFunSuite
 class StateTest extends AnyFunSuite {
 
   val start = State(Map(
-    "Client1" -> Client("Client1", 100, Map("Asset" -> 10)),
-    "Client2" -> Client("Client2", 100, Map("Asset" -> 20))
+    "Client1" -> Client(100, Map("Asset" -> 10)),
+    "Client2" -> Client(100, Map("Asset" -> 20))
   ), List.empty)
 
   test("State.next.matched") {
@@ -16,8 +16,8 @@ class StateTest extends AnyFunSuite {
         .next(Order("Client2", Sale, "Asset", 5, 2))
         ===
         State(Map(
-          "Client1" -> Client("Client1", 90, Map("Asset" -> 12)),
-          "Client2" -> Client("Client2", 110, Map("Asset" -> 18))
+          "Client1" -> Client(90, Map("Asset" -> 12)),
+          "Client2" -> Client(110, Map("Asset" -> 18))
         ), List.empty)
     )
     assert(
@@ -26,8 +26,8 @@ class StateTest extends AnyFunSuite {
         .next(Order("Client2", Sale, "Asset", 5, 2))
         ===
         State(Map(
-          "Client1" -> Client("Client1", 90, Map("Asset" -> 12)),
-          "Client2" -> Client("Client2", 110, Map("Asset" -> 18))
+          "Client1" -> Client(90, Map("Asset" -> 12)),
+          "Client2" -> Client(110, Map("Asset" -> 18))
         ), List.empty)
     )
   }

@@ -27,33 +27,30 @@ case class State(repo: Map[String, Client], orders: List[Order]) extends io.TsvW
     val (before, matchedAndAfter) = orders.span(_ notMatched o)
 
     val afterDeal: Option[State] = for {
-      matched <- matchedAndAfter.headOption
-      (client1, client2) = (o.client, matched.client)
-      _ = assert(client1!=client2)
-      (side1, side2) = (repo(client1), repo(client2))
-      _ = assert(side1.id==client1)
-      _ = assert(side2.id==client2)
+      m <- matchedAndAfter.headOption
+      (side1, side2) = (repo(o.client), repo(m.client))
 
-      price = priceLogic(o, matched)
+      price = priceLogic(o, m)
       amount: Currency = price*o.number
+      (asset, number) = (o.asset, o.number) // more sophisticated logic here in case partial order processing
 
       if side1.able(o, amount)
-      if side2.able(matched, amount)
+      if side2.able(m, amount)
 
-      ((dBalance1, dAsset1), (dBalance2, dAsset2)) = (o.deltas, matched.deltas)
+      ((dBalance1, dAsset1), (dBalance2, dAsset2)) = (o.deltas, m.deltas)
       _ = assert(dBalance1 == -dBalance2)
       _ = assert(dAsset1 == -dAsset2)
 
     } yield copy(
       repo = repo ++
         Map(
-          client1 -> side1.copy(
+          o.client -> side1.copy(
             balance = side1.balance + dBalance1 * amount,
-            assets = side1.assets + (o.asset -> (side1.assets(o.asset) + dAsset1 * o.number))
+            assets = side1.assets + (asset -> (side1.assets(asset) + dAsset1 * number))
           ),
-          client2 -> side2.copy(
+          m.client -> side2.copy(
             balance = side2.balance + dBalance2 * amount,
-            assets = side2.assets + (o.asset -> (side2.assets(o.asset) + dAsset2 * o.number))
+            assets = side2.assets + (asset -> (side2.assets(asset) + dAsset2 * number))
           )
         ),
       orders = before ++ matchedAndAfter.tail
@@ -63,5 +60,5 @@ case class State(repo: Map[String, Client], orders: List[Order]) extends io.TsvW
   }
 
   def write(ids: Seq[String]): Unit =
-    write[Client](_.toArray)(ids.map(repo(_)))
+    write[(String, Client)]{ case (id, c) => id +: c.toArray }(ids.map(id => id -> repo(id)))
 }

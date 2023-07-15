@@ -3,10 +3,10 @@ package model
 import model.Currency.Currency
 import model.Directions._
 
-case class Client(id: String, balance: Currency, assets: Map[String, Int]) {
+case class Client(balance: Currency, assets: Map[String, Int]) {
 
   val toList: List[String] =
-    id :: balance.toString :: Assets.all.map(assets.getOrElse(_, 0).toString)
+    balance.toString :: Assets.all.map(assets.getOrElse(_, 0).toString)
 
   val toArray: Array[String] = toList.toArray
 
@@ -26,11 +26,11 @@ case class Client(id: String, balance: Currency, assets: Map[String, Int]) {
 
 object Client {
 
-  val fromList: List[String] => Client = _ match {
+  val fromList: List[String] => (String, Client) = _ match {
     case id :: balance :: assets =>
       assert(assets.size == Assets.all.size)
-      Client(id, Currency(balance), (Assets.all zip assets.map(_.toInt)).toMap)
+      id -> Client(Currency(balance), (Assets.all zip assets.map(_.toInt)).toMap)
   }
 
-  val fromArray: Array[String] => Client = fromList compose { _.toList }
+  val fromArray: Array[String] => (String, Client) = fromList compose { _.toList }
 }
