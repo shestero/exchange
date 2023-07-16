@@ -38,7 +38,7 @@ class StateTest extends AnyFunSuite {
         .next(Order("Client1", Sale, "Asset", 6, 2))
         .next(Order("Client2", Sale, "Asset", 5, 2))
         ===
-        State(start.repo, List(
+        State(start.clients, List(
           Order("Client1", Sale, "Asset", 6, 2),
           Order("Client2", Sale, "Asset", 5, 2)
         ))
@@ -51,7 +51,7 @@ class StateTest extends AnyFunSuite {
         .next(Order("Client1", Buy, "Asset1", 5, 2))
         .next(Order("Client2", Sale, "Asset2", 5, 2))
         ===
-        State(start.repo, List(
+        State(start.clients, List(
           Order("Client1", Buy, "Asset1", 5, 2),
           Order("Client2", Sale, "Asset2", 5, 2)
         ))
@@ -64,7 +64,7 @@ class StateTest extends AnyFunSuite {
         .next(Order("Client1", Buy, "Asset", 5, 2))
         .next(Order("Client2", Sale, "Asset", 6, 2))
         ===
-        State(start.repo, List(
+        State(start.clients, List(
           Order("Client1", Buy, "Asset", 5, 2),
           Order("Client2", Sale, "Asset", 6, 2)
         ))

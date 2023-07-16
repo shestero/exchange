@@ -1,5 +1,5 @@
 import model._
 
-object Main extends App {
+object Start extends App {
   Orders.stream.foldLeft(Clients.start)(_ next _).write(Clients.ids)
 }

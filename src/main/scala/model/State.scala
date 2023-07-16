@@ -5,10 +5,10 @@ import model.Directions._
 
 /**
  * Represent the current state of exchange
- * @param repo - the repository of clients (balances and asset amounts)
+ * @param clients - the repository of clients (balances and asset amounts)
  * @param orders - the ordered list of previous orders that was not satisfied
  */
-case class State(repo: Map[String, Client], orders: List[Order]) extends io.TsvWriter("result.txt")
+case class State(clients: Map[String, Client], orders: List[Order]) extends io.TsvWriter("result.txt")
 {
   // define price of the deal here.
   // In any case it must be somewhere between o.price and oo.price (including)
@@ -19,7 +19,7 @@ case class State(repo: Map[String, Client], orders: List[Order]) extends io.TsvW
 
   // Process a new coming order
   def next(o: Order): State = {
-    if (!repo.contains(o.client)) {
+    if (!clients.contains(o.client)) {
       System.err.println(s"Warning: new order from unknown client '${o.client}; this order is skipped.")
       return this
     }
@@ -28,7 +28,7 @@ case class State(repo: Map[String, Client], orders: List[Order]) extends io.TsvW
 
     val afterDeal: Option[State] = for {
       m <- matchedAndAfter.headOption
-      (side1, side2) = (repo(o.client), repo(m.client))
+      (side1, side2) = (clients(o.client), clients(m.client))
 
       price = priceLogic(o, m)
       amount: Currency = price*o.number
@@ -42,7 +42,7 @@ case class State(repo: Map[String, Client], orders: List[Order]) extends io.TsvW
       _ = assert(dAsset1 == -dAsset2)
 
     } yield copy(
-      repo = repo ++
+      clients = clients ++
         Map(
           o.client -> side1.copy(
             balance = side1.balance + dBalance1 * amount,
@@ -60,5 +60,5 @@ case class State(repo: Map[String, Client], orders: List[Order]) extends io.TsvW
   }
 
   def write(ids: Seq[String]): Unit =
-    write[(String, Client)]{ case (id, c) => id +: c.toArray }(ids.map(id => id -> repo(id)))
+    write[(String, Client)]{ case (id, c) => id +: c.toArray }(ids.map(id => id -> clients(id)))
 }
