@@ -1,7 +1,6 @@
 package model
 
 import model.Currency.Currency
-import model.Directions._
 
 /**
  * Represent the current state of exchange
@@ -26,14 +25,20 @@ case class State(clients: Map[String, Client], orders: LazyList[Order]) extends 
       return this
     }
 
-    val (before, matchedAndAfter) = orders.span(_ notMatched o)
+    val find = orders.span(_ notMatched o) match {
+      case (before, m_after) => for {
+        m <- m_after.headOption
+        after = m_after.tail
+      } yield (before, m, after)
+      case _ => None
+    }
 
     val afterDeal: Option[State] = for {
-      m <- matchedAndAfter.headOption
+      (before, m, after) <- find
       (side1, side2) = (clients(o.client), clients(m.client))
 
       price = priceLogic(o, m)
-      amount: Currency = price*o.number
+      amount: Currency = price * o.number
       (asset, number) = (o.asset, o.number) // more sophisticated logic here in case partial order processing
 
       if side1.able(o, amount)
@@ -55,7 +60,7 @@ case class State(clients: Map[String, Client], orders: LazyList[Order]) extends 
             assets = side2.assets + (asset -> (side2.assets(asset) + dAsset2 * number))
           )
         ),
-      orders = before ++ matchedAndAfter.tail
+      orders = before ++ after
     )
 
     afterDeal getOrElse copy(orders = orders :+ o) // if the order wasn't processed then it is to be stored
