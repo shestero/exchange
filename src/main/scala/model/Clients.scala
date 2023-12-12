@@ -8,6 +8,6 @@ object Clients extends io.TsvReader("clients.txt") {
   val ids: Seq[String] = clients.map(_._1)
 
   // start = initial state
-  val start = State(clients.toMap, List.empty)
+  val start = State(clients.toMap, Orders.lazyList)
 
 }

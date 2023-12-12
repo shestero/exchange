@@ -6,10 +6,12 @@ import model.Directions._
 /**
  * Represent the current state of exchange
  * @param clients - the repository of clients (balances and asset amounts)
- * @param orders - the ordered list of previous orders that was not satisfied
+ * @param orders - the ordered list of the orders that was not satisfied
  */
-case class State(clients: Map[String, Client], orders: List[Order]) extends io.TsvWriter("result.txt")
+case class State(clients: Map[String, Client], orders: LazyList[Order]) extends io.TsvWriter("result.txt")
 {
+  lazy val withoutOrders: State = copy(orders = LazyList.empty)
+
   // define price of the deal here.
   // In any case it must be somewhere between o.price and oo.price (including)
   def priceLogic(o: Order, oo: Order): Currency = {
