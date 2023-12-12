@@ -13,9 +13,9 @@ case class State(clients: Map[String, Client], orders: LazyList[Order]) extends 
 
   // define price of the deal here.
   // In any case it must be somewhere between o.price and oo.price (including)
-  def priceLogic(o: Order, oo: Order): Currency = {
-    assert(o matched oo)
-    Math.min(o.price, oo.price)
+  def priceLogic(o1: Order, o2: Order): Currency = {
+    assert(o1 matched o2)
+    Math.min(o1.price, o2.price)
   }
 
   // Process a new coming order
