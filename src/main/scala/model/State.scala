@@ -26,9 +26,9 @@ case class State(clients: Map[String, Client], orders: LazyList[Order]) extends 
     }
 
     val find = orders.span(_ notMatched o) match {
-      case (before, m_after) => for {
-        m <- m_after.headOption
-        after = m_after.tail
+      case (before, m_and_after) => for {
+        m <- m_and_after.headOption
+        after = m_and_after.tail
       } yield (before, m, after)
       case _ => None
     }
